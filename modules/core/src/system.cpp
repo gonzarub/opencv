@@ -417,7 +417,9 @@ int64 getTickCount(void)
 #else
     struct timeval tv;
     struct timezone tz;
+#ifndef __OPENCV_BAREMETAL__
     gettimeofday( &tv, &tz );
+#endif
     return (int64)tv.tv_sec*1000000 + tv.tv_usec;
 #endif
 }
@@ -864,6 +866,7 @@ struct Mutex::Impl
 
 #else
 
+#ifdef HAVE_PTHREADS     //__OPENCV_BAREMETAL__
 struct Mutex::Impl
 {
     Impl()
@@ -885,9 +888,10 @@ struct Mutex::Impl
     pthread_mutex_t mt;
     int refcount;
 };
-
+#endif //HAVE_PTHREADS
 #endif
 
+#ifdef HAVE_PTHREADS  //__OPENCV_BAREMETAL__
 Mutex::Mutex()
 {
     impl = new Mutex::Impl;
@@ -918,7 +922,7 @@ Mutex& Mutex::operator = (const Mutex& m)
 void Mutex::lock() { impl->lock(); }
 void Mutex::unlock() { impl->unlock(); }
 bool Mutex::trylock() { return impl->trylock(); }
-
+#endif //HAVE_PTHREADS
 
 //////////////////////////////// thread-local storage ////////////////////////////////
 
@@ -1031,6 +1035,7 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID lpReserved)
 #endif
 
 #else
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
     static pthread_key_t tlsKey = 0;
     static pthread_once_t tlsKeyOnce = PTHREAD_ONCE_INIT;
 
@@ -1056,8 +1061,10 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID lpReserved)
         }
         return d;
     }
+#endif //HAVE_PTHREADS
 #endif
 
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
 class TLSContainerStorage
 {
     cv::Mutex mutex_;
@@ -1160,7 +1167,7 @@ TLSData<CoreTLSData>& getCoreTlsData()
     return *value;
 }
 
-
+#endif //HAVE_PTHREADS
 
 #ifdef CV_COLLECT_IMPL_DATA
 ImplCollector& getImplData()
@@ -1243,7 +1250,7 @@ String getIppErrorLocation()
 
 bool useIPP()
 {
-#ifdef HAVE_IPP
+#if defined(HAVE_IPP) && defined(HAVE_PTHREADS) //__OPENCV_BAREMETAL__
     CoreTLSData* data = getCoreTlsData().get();
     if(data->useIPP < 0)
     {
@@ -1261,6 +1268,7 @@ bool useIPP()
 
 void setUseIPP(bool flag)
 {
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
     CoreTLSData* data = getCoreTlsData().get();
 #ifdef HAVE_IPP
     data->useIPP = flag;
@@ -1268,6 +1276,7 @@ void setUseIPP(bool flag)
     (void)flag;
     data->useIPP = false;
 #endif
+#endif    
 }
 
 } // namespace ipp

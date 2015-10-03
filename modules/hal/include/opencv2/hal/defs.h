@@ -272,7 +272,9 @@
      typedef std::uint32_t uint;
 #  else
 #    include <stdint.h>
-     typedef uint32_t uint;
+#      ifndef __OPENCV_BAREMETAL__
+         typedef uint32_t uint;
+#      endif
 #  endif
 #else
    typedef unsigned uint;

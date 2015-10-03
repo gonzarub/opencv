@@ -48,6 +48,7 @@
 
 #define USE_ZLIB 1
 
+
 #ifdef __APPLE__
 #  include "TargetConditionals.h"
 #  if (defined TARGET_OS_IPHONE && TARGET_OS_IPHONE) || (defined TARGET_IPHONE_SIMULATOR && TARGET_IPHONE_SIMULATOR)
@@ -55,6 +56,12 @@
 #    define USE_ZLIB 0
      typedef void* gzFile;
 #  endif
+#endif
+
+#ifdef __OPENCV_BAREMETAL__
+#    undef USE_ZLIB
+#    define USE_ZLIB 0
+     typedef void* gzFile;
 #endif
 
 #if USE_ZLIB

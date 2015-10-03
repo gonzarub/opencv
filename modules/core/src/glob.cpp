@@ -131,12 +131,15 @@ namespace
 
 }
 #else
+#ifndef __OPENCV_BAREMETAL__
 # include <dirent.h>
 # include <sys/stat.h>
 const char dir_separators[] = "/";
 const char native_separator = '/';
 #endif
+#endif
 
+#ifndef __OPENCV_BAREMETAL__
 static bool isDir(const cv::String& path, DIR* dir)
 {
 #if defined WIN32 || defined _WIN32 || defined WINCE
@@ -291,3 +294,4 @@ void cv::glob(String pattern, std::vector<String>& result, bool recursive)
     glob_rec(path, wildchart, result, recursive);
     std::sort(result.begin(), result.end());
 }
+#endif

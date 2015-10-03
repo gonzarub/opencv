@@ -731,7 +731,12 @@ void RNG::fill( InputOutputArray _mat, int disttype,
 
 cv::RNG& cv::theRNG()
 {
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
     return getCoreTlsData().get()->rng;
+#else
+    static RNG rng;
+    return rng;
+#endif    
 }
 
 void cv::randu(InputOutputArray dst, InputArray low, InputArray high)

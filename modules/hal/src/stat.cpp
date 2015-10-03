@@ -41,7 +41,9 @@
 //M*/
 
 #include "precomp.hpp"
-
+#ifdef __OPENCV_BAREMETAL__
+  typedef uint32_t uint;
+#endif
 namespace cv { namespace hal {
 
 static const uchar popCountTable[] =

@@ -48,8 +48,9 @@ namespace cv {
 
 // it should be a prime number for the best hash function
 enum { UMAT_NLOCKS = 31 };
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
 static Mutex umatLocks[UMAT_NLOCKS];
-
+#endif
 UMatData::UMatData(const MatAllocator* allocator)
 {
     prevAllocator = currAllocator = allocator;
@@ -76,12 +77,16 @@ UMatData::~UMatData()
 
 void UMatData::lock()
 {
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
     umatLocks[(size_t)(void*)this % UMAT_NLOCKS].lock();
+#endif
 }
 
 void UMatData::unlock()
 {
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
     umatLocks[(size_t)(void*)this % UMAT_NLOCKS].unlock();
+#endif
 }
 
 

@@ -1479,6 +1479,7 @@ bool haveOpenCL()
 
 bool useOpenCL()
 {
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
     CoreTLSData* data = getCoreTlsData().get();
     if( data->useOpenCL < 0 )
     {
@@ -1492,14 +1493,19 @@ bool useOpenCL()
         }
     }
     return data->useOpenCL > 0;
+#else //__OPENCV_BAREMETAL__
+    return false;
+#endif    
 }
 
 void setUseOpenCL(bool flag)
 {
     if( haveOpenCL() )
     {
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
         CoreTLSData* data = getCoreTlsData().get();
         data->useOpenCL = (flag && Device::getDefault().ptr() != NULL) ? 1 : 0;
+#endif
     }
 }
 
@@ -2168,11 +2174,17 @@ size_t Device::profilingTimerResolution() const
 
 const Device& Device::getDefault()
 {
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
     const Context& ctx = Context::getDefault();
     int idx = getCoreTlsData().get()->device;
     const Device& device = ctx.device(idx);
     return device;
+#else
+    static Device dummy;
+    return dummy;
+#endif 
 }
+
 
 ////////////////////////////////////// Context ///////////////////////////////////////////////////
 
@@ -3048,10 +3060,18 @@ void* Queue::ptr() const
 
 Queue& Queue::getDefault()
 {
+#ifndef HAVE_OPENCL //__OPENCV_BAREMETAL__
+    static Queue q;
+#else //__OPENCV_BAREMETAL__
     Queue& q = getCoreTlsData().get()->oclQueue;
     if( !q.p && haveOpenCL() )
         q.create(Context::getDefault());
+#endif
     return q;
+
+
+
+        
 }
 
 static cl_command_queue getQueue(const Queue& q)
@@ -3785,8 +3805,9 @@ class OpenCLBufferPoolBaseImpl : public BufferPoolController, public OpenCLBuffe
 private:
     inline Derived& derived() { return *static_cast<Derived*>(this); }
 protected:
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
     Mutex mutex_;
-
+#endif
     size_t currentReservedSize;
     size_t maxReservedSize;
 
@@ -3891,7 +3912,9 @@ public:
 public:
     virtual T allocate(size_t size)
     {
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
         AutoLock locker(mutex_);
+#endif
         BufferEntry entry;
         if (maxReservedSize > 0 && _findAndRemoveEntryFromReservedList(entry, size))
         {
@@ -3906,7 +3929,9 @@ public:
     }
     virtual void release(T buffer)
     {
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
         AutoLock locker(mutex_);
+#endif
         BufferEntry entry;
         CV_Assert(_findAndRemoveEntryFromAllocatedList(entry, buffer));
         if (maxReservedSize == 0 || entry.capacity_ > maxReservedSize / 8)
@@ -3925,7 +3950,9 @@ public:
     virtual size_t getMaxReservedSize() const { return maxReservedSize; }
     virtual void setMaxReservedSize(size_t size)
     {
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
         AutoLock locker(mutex_);
+#endif
         size_t oldMaxReservedSize = maxReservedSize;
         maxReservedSize = size;
         if (maxReservedSize < oldMaxReservedSize)
@@ -3949,7 +3976,9 @@ public:
     }
     virtual void freeAllReservedBuffers()
     {
+#ifdef HAVE_PTHREADS //__OPENCV_BAREMETAL__
         AutoLock locker(mutex_);
+#endif
         typename std::list<BufferEntry>::const_iterator i = reservedEntries_.begin();
         for (; i != reservedEntries_.end(); ++i)
         {

@@ -80,7 +80,6 @@
    4. HAVE_GCD         - system wide, used automatically        (APPLE only)
    5. WINRT            - system wide, used automatically        (Windows RT only)
    6. HAVE_CONCURRENCY - part of runtime, used automatically    (Windows only - MSVS 10, MSVS 11)
-   7. HAVE_PTHREADS_PF - pthreads if available
 */
 
 #if defined HAVE_TBB
@@ -133,13 +132,12 @@
 namespace cv
 {
     ParallelLoopBody::~ParallelLoopBody() {}
-#ifdef HAVE_PTHREADS_PF
+#ifdef HAVE_PTHREADS_PF    
     void parallel_for_pthreads(const cv::Range& range, const cv::ParallelLoopBody& body, double nstripes);
     size_t parallel_pthreads_get_threads_num();
     void parallel_pthreads_set_threads_num(int num);
-#endif
+#endif    
 }
-
 
 namespace
 {
@@ -454,7 +452,7 @@ int cv::getThreadNum(void)
 #elif defined HAVE_CONCURRENCY
     return std::max(0, (int)Concurrency::Context::VirtualProcessorId()); // zero for master thread, unique number for others but not necessary 1,2,3,...
 #elif defined HAVE_PTHREADS_PF
-    return (int)(size_t)(void*)pthread_self(); // no zero-based indexing
+    return (int)(size_t)(void*)pthread_self(); // no zero-based indexing    
 #else
     return 0;
 #endif
