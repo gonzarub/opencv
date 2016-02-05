@@ -11,10 +11,10 @@ performance or accuracy. Use it at your own risk.
 
 Two new platform files are added:
 
-- platforms/arm-xilinx-eabi/arm-xilinx-eabi.toolchain.cmake
-  - build-arm-xilinx-eabi.sh
-- platforms/linaro-arm-eabi/linaro-arm-eabi.toolchain.cmake
-  - build-linaro-arm-eabi.sh
+- `platforms/arm-xilinx-eabi/arm-xilinx-eabi.toolchain.cmake`
+  - `build-arm-xilinx-eabi.sh`
+- `platforms/linaro-arm-eabi/linaro-arm-eabi.toolchain.cmake`
+  - `build-linaro-arm-eabi.sh`
 
 There is also a shell script aimed to automate selection of features
 from cmake options. Look for more intructions in the shell script's
