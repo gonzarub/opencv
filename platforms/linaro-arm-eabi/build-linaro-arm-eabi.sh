@@ -132,5 +132,7 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
         -D WITH_WEBP=OFF \
         -D WITH_XIMEA=OFF \
         -D WITH_IPP=OFF \
+        -DENABLE_VFPV3=ON \
+        -DENABLE_NEON=ON \
         ../../../
 make -j4 VERBOSE=1
